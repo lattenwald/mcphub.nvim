@@ -208,20 +208,20 @@ function M.validate_version(ver_str)
     }
 
     local required = version.REQUIRED_NODE_VERSION
-    if current.major ~= required.major or current.minor < required.minor then
-        return {
-            ok = false,
-            error = Error(
-                "SETUP",
-                Error.Types.SETUP.VERSION_MISMATCH,
-                string.format("Incompatible mcp-hub version. Found %s, required %s", ver_str, required.string),
-                {
-                    found = ver_str,
-                    required = required.string,
-                    install_cmd = string.format("npm install -g mcp-hub@%s", required.string),
-                }
-            ),
-        }
+    local is_incompatible = current.major ~= required.major or current.minor < required.minor
+
+    if is_incompatible then
+        vim.schedule(function()
+            vim.notify(
+                string.format(
+                    "MCPHub: Incompatible mcp-hub version %s (expected %s). Run: npm install -g mcp-hub@%s",
+                    ver_str,
+                    required.string,
+                    required.string
+                ),
+                vim.log.levels.WARN
+            )
+        end)
     end
 
     return {
